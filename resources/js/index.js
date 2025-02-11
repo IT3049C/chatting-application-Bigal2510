@@ -7,9 +7,7 @@ const serverURL = `https://it3049c-chat.fly.dev/messages`;
 
 async function fetchMessages() {
   const response = await fetch(serverURL);
-  // if (!response.ok) throw new Error("Failed to fetch messages");
-  const messages = await response.json();
-  return messages;
+  return response.json();
 }
 
 function formatMessage(message, myNameInput) {
@@ -59,12 +57,10 @@ sendButton.addEventListener("click", async function (event) {
   const sender = nameInput.value.trim();
   const message = myMessage.value.trim();
 
-  if (!message.trim()) return;
+  if (!message) return;
 
   await sendMessages(sender, message);
   myMessage.value = "";
-
-  updateMessages();
 });
 
 
@@ -72,17 +68,21 @@ async function sendMessages(username, text) {
   const newMessage = {
     sender: username,
     text: text,
-    timestamp: new Date().toISOString(),
+    timestamp: new Date()
   };
 
-  await fetch(serverURL, {
+  fetch(serverURL, {
     method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify(newMessage),
+    headers: {
+      'Content-Type': 'application/json'
+    },
+    body: JSON.stringify(newMessage)
   });
 
-  await updateMessages();
+await updateMessages();
 }
+
+  
 
 setInterval(updateMessages, 10000);
 
