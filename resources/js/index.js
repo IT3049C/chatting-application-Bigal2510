@@ -12,7 +12,7 @@ async function fetchMessages() {
 
 function formatMessage(message, myNameInput) {
   const time = new Date(message.timestamp);
-  const formattedTime = `${time.getHours()}:${String(time.getMinutes()).padStart(2, "0")}`;
+  const formattedTime = `${time.getHours()}:${time.getMinutes()}`;
 
   if (myNameInput === message.sender) {
     return `
