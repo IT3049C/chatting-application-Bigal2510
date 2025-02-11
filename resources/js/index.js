@@ -1,7 +1,16 @@
 const nameInput = document.getElementById("my-name-input");
-const myMessage = document.getElementById("my-message");
+const myMessage = document.getElementById("my-message-input");
 const sendButton = document.getElementById("send-button");
 const chatBox = document.getElementById("chat");
+
+const serverURL = `https://it3049c-chat.fly.dev/messages`;
+
+async function fetchMessages() {
+  const response = await fetch(serverURL);
+  // if (!response.ok) throw new Error("Failed to fetch messages");
+  const messages = await response.json();
+  return messages;
+}
 
 function formatMessage(message, myNameInput) {
   const time = new Date(message.timestamp);
@@ -32,56 +41,30 @@ function formatMessage(message, myNameInput) {
   }
 }
 
-// function fetchMessages() {
-//   return [
-//     {
-//       id: 1,
-//       text: "One message",
-//       sender: "Alex Jones",
-//       timestamp: 1537410673072
-//     },
-//     {
-//       id: 2,
-//       text: "Another message",
-//       sender: "Alex Jones",
-//       timestamp: 1537410673072
-//     },
-//     {
-//       id: 3,
-//       text: "This is a message from someone else",
-//       sender: "Someone Else",
-//       timestamp: 1537410673072
-//     }
-//   ];
-// }
-const serverURL = `https://it3049c-chat.fly.dev/messages`;
 
-function fetchMessages() {
-  return fetch(serverURL)
-    .then(response => response.json());
-}
+
 
 async function updateMessages() {
   const messages = await fetchMessages();
-  if (!messages) return;
+  //if (!messages || messages.length === 0) {
+   // chatBox.innerHTML = "<p>No messages available.</p>"; // Debugging
+   // return;
+ // }
 
-  let formattedMessages = "";
-  messages.forEach(message => {
-    formattedMessages += formatMessage(message, nameInput.value);
-  });
-
-  chatBox.innerHTML = formattedMessages;
+  chatBox.innerHTML = messages.map(msg => formatMessage(msg, nameInput.value)).join("");
 }
 
-sendButton.addEventListener("click", async function(event) {
+sendButton.addEventListener("click", async function (event) {
   event.preventDefault();
-  const sender = nameInput.value;
-  const message = myMessage.value;
+  const sender = nameInput.value.trim();
+  const message = myMessage.value.trim();
 
   if (!message.trim()) return;
 
   await sendMessages(sender, message);
   myMessage.value = "";
+
+  updateMessages();
 });
 
 
@@ -89,24 +72,18 @@ async function sendMessages(username, text) {
   const newMessage = {
     sender: username,
     text: text,
-    timestamp: new Date().toISOString()
+    timestamp: new Date().toISOString(),
   };
 
-
-
-async function updateMessages() {
-  const messages = await fetchMessages();
-}
-
-fetch(serverURL, {
+  await fetch(serverURL, {
     method: "POST",
-    headers: {
-      'Content-Type': 'application/json'
-    },
-    body: JSON.stringify(newMessage)
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(newMessage),
   });
+
+  await updateMessages();
 }
 
-const MILLISECONDS_IN_TEN_SECONDS = 10000;
-setInterval(updateMessages, MILLISECONDS_IN_TEN_SECONDS);
+setInterval(updateMessages, 10000);
 
+updateMessages();
